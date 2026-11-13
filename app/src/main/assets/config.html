@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>伴侣 · 手机配置</title>
+<style>
+:root{font-family:system-ui,"Microsoft YaHei",sans-serif;color:#e5f1f2;background:#0b151b;color-scheme:dark}*{box-sizing:border-box}body{margin:0;padding:28px 20px;line-height:1.7}main{max-width:920px;margin:auto}h1{font-size:30px;margin:8px 0}h2{font-size:20px;margin:0 0 12px}.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}.card{padding:22px;background:#13232c;border:1px solid #29414b;border-radius:18px;margin:18px 0}p,small{color:#a2bcc3}label{display:block;margin-top:14px}input,select,textarea{width:100%;font:inherit;color:inherit;background:#0c1b23;border:1px solid #3b5662;padding:11px;border-radius:9px;margin-top:5px}textarea{min-height:110px}input[type=checkbox]{width:auto}button{font:inherit;background:#a5e8d1;color:#102b29;border:0;border-radius:10px;padding:11px 16px;cursor:pointer;margin:12px 8px 0 0}button:disabled{opacity:.5;cursor:wait}pre,#status,#feedback,#testResult{white-space:pre-wrap;overflow-wrap:anywhere}img{max-width:100%;border-radius:10px}details{margin-top:18px}summary{cursor:pointer;color:#b5d8cf}@media(max-width:720px){.grid{grid-template-columns:1fr}}
+</style></head><body><main><small>伴侣 · Android 原生版</small><h1>在电脑上配置你的手机</h1><p>手机负责相机、MCP 和视觉请求。此页面只用于局域网配置，首次开启相机需在手机授权。HTTP 明文传输，请仅在自己的可信网络使用，不要公开带口令的链接。</p>
+<div class="card" id="login"><label>访问口令<input id="access" type="password" autocomplete="off"></label><button id="unlock">连接手机</button></div>
+<div class="grid"><section class="card"><h2>连接与模型</h2><form id="settings">
+<label>官方 MCP 接入点<input id="endpoint" type="password" autocomplete="off" placeholder="wss://…；留空保留已保存值"></label><small id="saved"></small>
+<label><input type="checkbox" id="clear_endpoint"> 清空已保存 MCP 接入点</label>
+<label>视觉通道<select id="use_custom"><option value="false">仅使用官方视觉（默认）</option><option value="true">官方未下发时，允许自定义备用接口</option></select></label><small>开发者视觉权益标注限时免费。是否下发外部 MCP 视觉权限以实际会话为准；自定义服务可能计费，只有允许备用或手动测试时才调用。</small>
+<details><summary>自定义视觉与图片设置</summary>
+<label>完整 Chat Completions 地址<input id="completion_url" type="url" placeholder="http://192.168.1.100:8000/v1/chat/completions"></label>
+<label>模型名称<input id="model"></label><label>API Key<input id="api_key" type="password" autocomplete="off" placeholder="留空保留已保存值"></label><small id="keyState"></small>
+<label><input type="checkbox" id="clear_api_key"> 清空已保存 API Key</label>
+<label>Device-Id（仅接口要求时填写）<input id="device_id"></label>
+<label>图片模式<select id="detail"><option value="false">速度优先：768，简短回答</option><option value="true">细节优先：1280</option></select></label></details>
+<label>电话联系人：每行“称呼=号码”<textarea id="contacts" placeholder="妈妈=13800138000"></textarea></label><small>不读取手机通讯录。手机预先授权电话权限后，小智可直接发起呼叫，无需逐次确认；通话由手机完成。</small>
+<button type="submit">保存到手机</button><button type="button" id="connect">重新连接 MCP</button><div id="feedback" role="status"></div></form></section>
+<section><div class="card"><h2>手机运行状态</h2><div id="status">等待连接…</div><button id="cameraOff">关闭相机</button><p>后台常开需在手机开启相机服务，并允许 MIUI 后台运行。网页不接收视频，不会主动开启摄像头。</p></div>
+<div class="card"><h2>验证视觉能力</h2><button id="testOfficial">测试官方视觉</button><button id="testCustom">测试自定义视觉</button><p>使用当前表单配置但不保存。官方测试需要会话已下发接口；单次工具调用附带的权限无法提前测试。自定义测试会调用你填写的服务。</p><img id="testImage" alt="视觉模型测试图片" hidden><div id="testResult" role="status"></div></div></section></div>
+</main><script>
+let key=location.hash.slice(1);let initialized=false;let testing=false;
+const element=id=>document.getElementById(id);
+async function api(path,body){const response=await fetch(path,{method:body===undefined?'GET':'POST',headers:{'X-Admin-Key':key,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw new Error(data.error||'手机请求失败');return data;}
+function values(){const result={};for(const name of ['endpoint','completion_url','model','api_key','device_id','contacts'])result[name]=element(name).value.trim();for(const name of ['detail','use_custom'])result[name]=element(name).value==='true';for(const name of ['clear_endpoint','clear_api_key'])result[name]=element(name).checked;return result;}
+async function refresh(){if(!key)return;try{const config=await api('/api/config');element('login').hidden=true;element('status').textContent=config.status;element('saved').textContent=config.endpoint_set?'MCP 接入点已保存，不回显密钥。':'尚未保存 MCP 接入点。';element('keyState').textContent=config.api_key_set?'API Key 已保存，不回显。':'尚未保存 API Key。';if(!initialized){for(const name of ['completion_url','model','device_id','contacts'])element(name).value=config[name]||'';for(const name of ['detail','use_custom'])element(name).value=String(!!config[name]);initialized=true;}}catch(error){element('status').textContent=error.message;element('login').hidden=false;}}
+element('unlock').onclick=()=>{key=element('access').value.trim();initialized=false;refresh();};
+element('settings').onsubmit=async event=>{event.preventDefault();try{await api('/api/config',values());element('endpoint').value='';element('api_key').value='';element('clear_endpoint').checked=false;element('clear_api_key').checked=false;element('feedback').textContent='已加密保存到手机。';await refresh();}catch(error){element('feedback').textContent=error.message;}};
+element('connect').onclick=async()=>{try{await api('/api/connect',{});element('feedback').textContent='已请求重新连接；未保存的表单不会生效。';await refresh();}catch(error){element('feedback').textContent=error.message;}};
+element('cameraOff').onclick=async()=>{try{await api('/api/camera-off',{});await refresh();}catch(error){element('feedback').textContent=error.message;}};
+async function test(official){if(testing)return;testing=true;element('testOfficial').disabled=true;element('testCustom').disabled=true;element('testResult').textContent='正在发送随机图片并核对…';element('testImage').hidden=true;try{const report=await api('/api/test',{...values(),official});element('testResult').textContent=report.report;if(report.image){element('testImage').src=report.image;element('testImage').hidden=false;}}catch(error){element('testResult').textContent=error.message;}finally{testing=false;element('testOfficial').disabled=false;element('testCustom').disabled=false;}}
+element('testOfficial').onclick=()=>test(true);element('testCustom').onclick=()=>test(false);
+refresh();setInterval(refresh,3000);
+</script></body></html>

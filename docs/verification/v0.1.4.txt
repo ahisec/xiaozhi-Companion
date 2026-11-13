@@ -1,0 +1,15 @@
+伴侣 Android 0.1.4 — APK 构建验证记录（2026-11-13）
+日期：2026-11-13（Asia/Shanghai）
+包名：cn.bigfish.phone（保留以兼容升级）；versionCode 5；minSdk 26；targetSdk 35
+工具链：Oracle JDK 21.0.9；Gradle 8.11.1；AGP 8.9.1；Android SDK / Build Tools 35
+Gradle：testReleaseUnitTest lintRelease assembleRelease 成功
+JVM 测试：36 项；失败 0；错误 0。新增镜头选择、镜头缺失不回退、固定焦距兼容及前后镜头四方向 JPEG 旋转计算；含原有模拟电话、触摸、协议与视觉请求测试。
+Lint：0 错误；1 个 GradleDependency 更新提示。annotation 1.8.1 与运行依赖对齐。
+网页 JavaScript：node --check 通过
+APK：zipalign 4 字节对齐；apksigner 验证通过（v2、v3）；ZIP 完整性通过
+APK 内网页与本次最终源码一致；公开网页不含默认访问口令
+角色资源：Deepseek Chan / Dullsaw；原图集 SHA-256、1536×2288 尺寸、透明通道及所用21帧非空校验通过；APK 内图集与来源元数据与源码一致
+签名证书 SHA-256：5e3124c7d5fb38547b7ba9a52694bb0bea612440f87f9ed4decce7c8e6980445
+APK SHA-256：03c8b0793fc271d55d78f339cfdde9fad2efb93be01c8629eaecdd1ed67f0670
+未执行：小米 8 本次覆盖安装、前后镜头真实切换与四方向预览和照片、选择保存、相机跨 Tab 和后台抓拍、锁屏保活、真实官方 MCP / 视觉请求、真实电话拨出。
+真实手机及真实服务表现需用户安装后实测；本记录不将本地测试当作实机验证。

@@ -1,0 +1,20 @@
+{
+  "id": "deepseek-chan",
+  "display_name": "Deepseek Chan",
+  "author": "Dullsaw",
+  "page": "https://codex-pets.net/#/pets/deepseek-chan",
+  "download": "https://codex-pets.net/api/pets/deepseek-chan/download?v=1791020401654",
+  "original_sheet": "https://codex-pets.net/assets/pets/v/1791020401654/deepseek-chan/spritesheet.webp",
+  "source_package_sha256": "84dd7b1ecdb6e9424e24f00751535eb23d8e5421380acfc07b90d8040a9ae32f",
+  "sheet_sha256": "3c2e0e0b1fb6a590806e2d857eb3ffe6a984889fc2f168cc171d92102ca2597e",
+  "sheet_size": [1536, 2288],
+  "frame_size": [192, 208],
+  "animations": {
+    "idle": {"row": 0, "frames": 6, "frame_ms": 260},
+    "tap": {"row": 3, "frames": 4, "frame_ms": 180},
+    "long_press": {"row": 6, "frames": 6, "frame_ms": 260},
+    "stroke": {"row": 4, "frames": 5, "frame_ms": 180}
+  },
+  "use": "Unmodified source spritesheet; animation cells selected at runtime by Android Canvas.",
+  "rights": "Community artwork. Explicit redistribution/commercial license has not been verified. Software dependency licenses do not grant rights to the character artwork."
+}
